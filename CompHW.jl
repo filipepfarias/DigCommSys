@@ -95,18 +95,6 @@ $\begin{aligned}
 \end{aligned}$
 """
 
-# ╔═╡ 6f445cfe-8be6-11eb-14da-f11e24d94094
-(alphabet,constellation) = MQAM(64)
-
-# ╔═╡ c5273a9a-8bd9-11eb-134f-f34babe7faa2
-begin
-	scatter(real(constellation[:]),imag(constellation[:]));
-	annotate!((real(constellation[:]),imag(constellation[:]).+.1,alphabet[:]))
-end
-
-# ╔═╡ 0e7f5c2a-8bff-11eb-1b1e-839b482632e5
-sum(abs.(constellation[:]))/64
-
 # ╔═╡ 0d70be04-8bf6-11eb-0638-a35109c2d36c
 md"
 ---
@@ -116,19 +104,16 @@ md"
 # ╔═╡ 21953290-8bf7-11eb-025f-87f8477b88c2
 html"""
 
-<span name="ref-proakis">[Proakis] Digital Communication Systems 5th Edition, John G. Proakis and Masoud Salehi.</span><br>
-<span name="ref-wiki1">[Wiki1] <a target="_blank" href="https://en.wikipedia.org/wiki/Summation#Powers_and_logarithm_of_arithmetic_progressions">Summation - Powers and logarithm of arithmetic progressions</a>. Wikipedia </span>
+<p><a name="ref-proakis">[Proakis]</a> Digital Communication Systems 5th Edition, John G. Proakis and Masoud Salehi.</p>
+<p><a name="ref-wiki1">[Wiki1]</a> <a target="_blank" href="https://en.wikipedia.org/wiki/Summation#Powers_and_logarithm_of_arithmetic_progressions">Summation - Powers and logarithm of arithmetic progressions</a>. Wikipedia </p>
 """
 
 # ╔═╡ Cell order:
-# ╠═8df467aa-8bd9-11eb-088e-218f062da936
+# ╟─8df467aa-8bd9-11eb-088e-218f062da936
 # ╠═25bc3a22-8be4-11eb-1414-0b8e408a7b54
 # ╠═9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
 # ╟─f1835c24-8bdc-11eb-2e3e-ffaca518a99c
-# ╠═9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
-# ╠═df77ee44-8c29-11eb-2b3d-ffa5dfc6a409
-# ╠═6f445cfe-8be6-11eb-14da-f11e24d94094
-# ╠═c5273a9a-8bd9-11eb-134f-f34babe7faa2
-# ╠═0e7f5c2a-8bff-11eb-1b1e-839b482632e5
+# ╟─9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
+# ╟─df77ee44-8c29-11eb-2b3d-ffa5dfc6a409
 # ╟─0d70be04-8bf6-11eb-0638-a35109c2d36c
 # ╟─21953290-8bf7-11eb-025f-87f8477b88c2
