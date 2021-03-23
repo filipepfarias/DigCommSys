@@ -29,22 +29,18 @@ To evaluate the average energy for each $M$ constellation of a rectangular QAM [
 
 $$A_m = \pm1,\pm3,\dots,\pm(\sqrt{M}-1).$$
 
-This represents the amplitudes of the digital PAM. With a **outer sum** of the arrays containing the **in-phase** $A_{mi}=[\pm1,\pm3,\dots,\pm(M-1)]$ and the **quadrature** $A_{mq}=[\pm1j,\pm3j,\dots,\pm(M-1)j]$ components, i.e. 
-
-$\begin{bmatrix}
-(M-1) + (M-1)j & (M-2) + (M-1)j & \dots & (M-1) + (M-1)j
-\end{bmatrix}$
+This represents the amplitudes of the digital PAM. With a **outer sum** of the arrays containing the **in-phase** $A_{mi}=[\pm1,\pm3,\dots,\pm(\sqrt{M}-1)]$ and the **quadrature** $A_{mq}=[\pm1j,\pm3j,\dots,$ $\pm(\sqrt{M}-1)j]$ components.
 
 "
 
 
 # ╔═╡ 6f445cfe-8be6-11eb-14da-f11e24d94094
-(alphabet,constellation) = MQAM(16)
+(alphabet,constellation) = MQAM(4)
 
 # ╔═╡ c5273a9a-8bd9-11eb-134f-f34babe7faa2
 begin
 	scatter(real(constellation[:]),imag(constellation[:]));
-	annotate!((real(constellation[:]),imag(constellation[:]).+.1,alphabet[:]),lims=(-1.05,1.05))
+	annotate!((real(constellation[:]),imag(constellation[:]).+.1,alphabet[:]))
 end
 
 # ╔═╡ 0d70be04-8bf6-11eb-0638-a35109c2d36c
