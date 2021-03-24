@@ -5,8 +5,8 @@ module DigCommSys
     import Plots
     import SpecialFunctions
 
-    include("GreyCode.jl")
-    export GreyCode
+    include("GrayCode.jl")
+    export GrayCode
 
     include("QAM.jl")
     export MQAM

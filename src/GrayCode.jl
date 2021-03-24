@@ -1,9 +1,9 @@
 """
-GreyCode(N)
+GrayCode(N)
 ---
-Generates Grey Code lookup table for N bits.
+Generates Gray Code lookup table for N bits.
 """
-function GreyCode(N)
+function GrayCode(N)
 	seq = BitArray([0, 1])
 	i = 1
 	while i<N

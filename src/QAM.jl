@@ -14,7 +14,7 @@ function MQAM(M,energy=2)
         Q = I.*1im
         constellation = (Q.+transpose(I))/√avgEnergy
 
-        alphabet = GreyCode(Int(log2(M)))
+        alphabet = GrayCode(Int(log2(M)))
         alphabet = [bitstring(alphabet[i,:]) for i=1:size(alphabet)[1]]
         alphabet = reshape(alphabet,(m,m))
 
