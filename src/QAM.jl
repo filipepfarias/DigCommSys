@@ -9,8 +9,7 @@ function MQAM(M,energy=2)
         d = sqrt(2*energy); #Digital Communications-Proakis (Table 3.2-1)
         avgEnergy = (M-1)/3*energy;
 
-
-        I = ((range(0,2*(m-1),step=d) .- (2*m-2)/2) .+0*1im);
+        I = ((2*(1:m) .- 1 .- m)*d/2) .+0*1im;
         Q = I.*1im
         constellation = (Q.+transpose(I))/√avgEnergy
 
