@@ -13,9 +13,6 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
-using Plots, DigCommSys
-
 # ╔═╡ 8df467aa-8bd9-11eb-088e-218f062da936
 md"# Digital Communication Systems
 ## Computational Homework (TI0069)
@@ -26,10 +23,13 @@ This notebook presents the implementations of the package DigCommSys, developed 
 "
 
 # ╔═╡ 25bc3a22-8be4-11eb-1414-0b8e408a7b54
-# begin
-# 	import Pkg;
-# 	Pkg.add(url="https://github.com/filippfarias/DigCommSys")
-# end
+begin
+	import Pkg;
+	Pkg.add(url="https://github.com/filippfarias/DigCommSys")
+end
+
+# ╔═╡ 9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
+#using Plots, DigCommSys
 
 # ╔═╡ f1835c24-8bdc-11eb-2e3e-ffaca518a99c
 md"""
