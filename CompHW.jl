@@ -4,6 +4,15 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        el
+    end
+end
+
 # ╔═╡ 9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
 using Plots, DigCommSys
 
@@ -114,12 +123,11 @@ md"""
 html"""
 <h6> 3. Modulator (bit-symbol mapping) </h6><br>
 
-<p>The M-QAM modulator is implemented in <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/QAM.jl" target="_blank"><code>QAM.jl</code></a> at the function <code>MQAM</code>. First of all, the function has two arguments, the order of the modulation <code>M</code> and the pulse <code>energy</code>.<br></p>
+<p>The M-QAM modulator is implemented in <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/QAM.jl" target="_blank"><code>QAM.jl</code></a> at the function <code>MQAM</code>. First of all, the function has two arguments, the order of the modulation <code>M</code> and the pulse <code>energy</code>. In the lines<br></p>
 """
 
 # ╔═╡ 45b663b0-8c67-11eb-1302-df7ec6e9452d
 md"""
-In the lines
 	
 	I = ((range(0,2*(m-1),step=d) .- (2*m-2)/2) .+0*1im);
 	Q = I.*1im
@@ -127,7 +135,17 @@ is evaluated the **in-phase** ```I``` and  **quadrature** amplitudes ```Q``` for
 
 	constellation = (Q.+transpose(I))/√avgEnergy
 obtaining the constellation normalised by the **root of the average energy** ```√avgEnergy```.
+
+	alphabet = GrayCode(Int(log2(M)))
 """
+
+# ╔═╡ 684ef8fc-8c69-11eb-0947-771929a7f355
+html"""
+<p>The next step is to construct the <code>alphabet</code> according to the <strong>Gray code</strong>. The <code>GrayCode</code> function implemented <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/GrayCode.jl" target="_blank">here</a> is based on <a href="#ref-wiki2">[Wiki2]</a>, by recursive concatenating and prefixing. The value inserted in <code>GrayCode</code> is equivalent to the number of bits possible for a M-QAM, i.e. <code>log2(M)</code>. The next steps are needed just to fix the way we construct the arrays and to fill the Gray code correctly. The function returns the <code>constellation</code> and the <code>alphabet</code>.
+"""
+
+# ╔═╡ 717edf16-8c6b-11eb-1b71-a51e7d799605
+plotly();
 
 # ╔═╡ 0d70be04-8bf6-11eb-0638-a35109c2d36c
 md"
@@ -157,8 +175,8 @@ correct(title,text) = Markdown.MD(Markdown.Admonition("correct", title, [text]))
 
 # ╔═╡ 7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
 begin 
-	M = [4,16,64];
-	e_avg = (M .- 1) ./ 3;
+	M_ = [4,16,64];
+	e_avg = (M_ .- 1) ./ 3;
 	correct("Answer for Question 1.1",md"""
 For $M=\{4,16,64\}$, considering $\mathcal{E}_g=1$, the average energy is, respectively, $ $[e_avg[1]], $[e_avg[2]], $[e_avg[3]]. $""");
 end
@@ -170,6 +188,19 @@ begin
 Being the QAM rectangular, we know that its module is $\sqrt{\mathcal{E}_g}=1$ which is half diagonal of the 4-QAM. Then by Pythagorean theorem we know that $2d^2 = 4\mathcal{E}_g$, what implies that $d_\text{min} = \sqrt{2\mathcal{E}_g}=\sqrt{2}$. By symmetry we can note this minimum distance holds for M-QAM.""");
 end
 
+# ╔═╡ 8d99049a-8c6b-11eb-3118-51c16e0927bf
+begin 
+	correct("Answer for Question 1.3",md"""
+Select the modulation: `M = ` $(@bind M html"<select><option value=4>4</option><option value=16>16</option><option value=64>64</option></select>")""");
+end
+
+# ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
+begin
+	(alphabetQ13,constellationQ13) = MQAM(parse(Int64,M));
+	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,lims=(-1.175,1.175));
+	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
+end
+
 # ╔═╡ Cell order:
 # ╟─8df467aa-8bd9-11eb-088e-218f062da936
 # ╠═25bc3a22-8be4-11eb-1414-0b8e408a7b54
@@ -178,14 +209,18 @@ end
 # ╟─57549df8-8c3f-11eb-16a5-c33fe4560e41
 # ╟─9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
 # ╟─98e4d1ba-8c45-11eb-2e90-21ecfb046773
-# ╟─7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
+# ╠═7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
 # ╟─df072ef6-8c63-11eb-0064-8328864e88cf
 # ╟─8036d610-8c61-11eb-2cef-43773fdbf97c
 # ╟─bd6f75c6-8c63-11eb-1541-f17f0f1803bb
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
+# ╟─684ef8fc-8c69-11eb-0947-771929a7f355
+# ╠═717edf16-8c6b-11eb-1b71-a51e7d799605
+# ╠═8d99049a-8c6b-11eb-3118-51c16e0927bf
+# ╟─78f40b68-8c6c-11eb-2925-15974d7dccb5
 # ╟─0d70be04-8bf6-11eb-0638-a35109c2d36c
-# ╠═21953290-8bf7-11eb-025f-87f8477b88c2
-# ╠═8e37ac06-8c5b-11eb-3ca4-07b42d5b841a
-# ╠═bf54e3d6-8c5b-11eb-1cd9-2b7bc38fc404
-# ╠═bf554652-8c5b-11eb-30f1-b9352a6f77cf
-# ╠═bf5fc848-8c5b-11eb-16e1-b7c9b467c87a
+# ╟─21953290-8bf7-11eb-025f-87f8477b88c2
+# ╟─8e37ac06-8c5b-11eb-3ca4-07b42d5b841a
+# ╟─bf54e3d6-8c5b-11eb-1cd9-2b7bc38fc404
+# ╟─bf554652-8c5b-11eb-30f1-b9352a6f77cf
+# ╟─bf5fc848-8c5b-11eb-16e1-b7c9b467c87a
