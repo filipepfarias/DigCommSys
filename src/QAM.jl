@@ -11,7 +11,7 @@ function MQAM(M,energy=2)
 
         I = ((2*(1:m) .- 1 .- m)*d/2) .+0*1im;
         Q = I.*1im
-        constellation = (Q.+transpose(I))/√avgEnergy
+        constellation = (Q.+transpose(I))
 
         alphabet = GrayCode(Int(log2(M)))
         alphabet = [bitstring(alphabet[i,:]) for i=1:size(alphabet)[1]]

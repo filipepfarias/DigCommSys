@@ -36,7 +36,7 @@ md"""
 #### Question 1
 ###### 1. Constellation Average Energy
 
-To evaluate the average energy for each $M$ constellation of a rectangular QAM [[Proakis]](#ref-proakis) [[Proakis]](#ans-q11) we need to consider first the **outer sum** of two $\sqrt{M}$--PAM signals, being **in-phase** $A_{mi}$ (real axis) and the **quadrature** $A_{mq}$ (imaginary axis) its components. In that way we can define the base band signal as
+To evaluate the average energy for each $M$ constellation of a rectangular QAM [[Proakis]](#ref-proakis) we need to consider first the **outer sum** of two $\sqrt{M}$--PAM signals, being **in-phase** $A_{mi}$ (real axis) and the **quadrature** $A_{mq}$ (imaginary axis) its components. In that way we can define the base band signal as
 
 $s_m(t) = (A_{mi} + jA_{mq})g(t).$
 
@@ -196,8 +196,8 @@ end
 
 # ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
 begin
-	(alphabetQ13,constellationQ13) = MQAM(parse(Int64,M));
-	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,lims=(-1.175,1.175));
+	(alphabetQ13,constellationQ13) = MQAM(parse(Int64,M),1);
+	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false);
 	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
 end
 
@@ -209,15 +209,15 @@ end
 # ╟─57549df8-8c3f-11eb-16a5-c33fe4560e41
 # ╟─9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
 # ╟─98e4d1ba-8c45-11eb-2e90-21ecfb046773
-# ╠═7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
+# ╟─7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
 # ╟─df072ef6-8c63-11eb-0064-8328864e88cf
 # ╟─8036d610-8c61-11eb-2cef-43773fdbf97c
 # ╟─bd6f75c6-8c63-11eb-1541-f17f0f1803bb
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
 # ╟─684ef8fc-8c69-11eb-0947-771929a7f355
-# ╠═717edf16-8c6b-11eb-1b71-a51e7d799605
+# ╟─717edf16-8c6b-11eb-1b71-a51e7d799605
 # ╟─8d99049a-8c6b-11eb-3118-51c16e0927bf
-# ╟─78f40b68-8c6c-11eb-2925-15974d7dccb5
+# ╠═78f40b68-8c6c-11eb-2925-15974d7dccb5
 # ╟─0d70be04-8bf6-11eb-0638-a35109c2d36c
 # ╟─21953290-8bf7-11eb-025f-87f8477b88c2
 # ╟─8e37ac06-8c5b-11eb-3ca4-07b42d5b841a
