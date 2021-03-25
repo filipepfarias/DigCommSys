@@ -129,14 +129,11 @@ html"""
 # ╔═╡ 45b663b0-8c67-11eb-1302-df7ec6e9452d
 md"""
 	
-	I = ((range(0,2*(m-1),step=d) .- (2*m-2)/2) .+0*1im);
+	I = ((2*(1:m) .- 1 .- m)*d/2) .+0*1im;
 	Q = I.*1im
-is evaluated the **in-phase** ```I``` and  **quadrature** amplitudes ```Q``` for the M-QAM constellation, where ```1im``` represents the imaginary $i$. Next we compute the **outer sum** by ```(Q.+transpose(I))``` in line
+is evaluated the **in-phase** ```I``` and  **quadrature** amplitudes ```Q``` for the M-QAM constellation, where ```1im``` represents the imaginary $i$, according to $(2m - 1 -\sqrt{M})$. Next we compute the **outer sum** by ```(Q.+transpose(I))``` in line
 
-	constellation = (Q.+transpose(I))/√avgEnergy
-obtaining the constellation normalised by the **root of the average energy** ```√avgEnergy```.
-
-	alphabet = GrayCode(Int(log2(M)))
+	constellation = (Q.+transpose(I))
 """
 
 # ╔═╡ 684ef8fc-8c69-11eb-0947-771929a7f355
@@ -144,8 +141,10 @@ html"""
 <p>The next step is to construct the <code>alphabet</code> according to the <strong>Gray code</strong>. The <code>GrayCode</code> function implemented <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/GrayCode.jl" target="_blank">here</a> is based on <a href="#ref-wiki2">[Wiki2]</a>, by recursive concatenating and prefixing. The value inserted in <code>GrayCode</code> is equivalent to the number of bits possible for a M-QAM, i.e. <code>log2(M)</code>. The next steps are needed just to fix the way we construct the arrays and to fill the Gray code correctly. The function returns the <code>constellation</code> and the <code>alphabet</code>.
 """
 
-# ╔═╡ 717edf16-8c6b-11eb-1b71-a51e7d799605
-plotly();
+# ╔═╡ 4d3d96b6-8ce0-11eb-21c2-ebfbda60351f
+md"""
+	alphabet = GrayCode(Int(log2(M)))
+"""
 
 # ╔═╡ 0d70be04-8bf6-11eb-0638-a35109c2d36c
 md"
@@ -196,6 +195,7 @@ end
 
 # ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
 begin
+	plotly();
 	(alphabetQ13,constellationQ13) = MQAM(parse(Int64,M),1);
 	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false);
 	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
@@ -215,9 +215,9 @@ end
 # ╟─bd6f75c6-8c63-11eb-1541-f17f0f1803bb
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
 # ╟─684ef8fc-8c69-11eb-0947-771929a7f355
-# ╟─717edf16-8c6b-11eb-1b71-a51e7d799605
+# ╟─4d3d96b6-8ce0-11eb-21c2-ebfbda60351f
 # ╟─8d99049a-8c6b-11eb-3118-51c16e0927bf
-# ╠═78f40b68-8c6c-11eb-2925-15974d7dccb5
+# ╟─78f40b68-8c6c-11eb-2925-15974d7dccb5
 # ╟─0d70be04-8bf6-11eb-0638-a35109c2d36c
 # ╟─21953290-8bf7-11eb-025f-87f8477b88c2
 # ╟─8e37ac06-8c5b-11eb-3ca4-07b42d5b841a
