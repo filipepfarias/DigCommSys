@@ -3,12 +3,10 @@
 bitModulation(bitsequence,M)
 ---
 """
-function bitModulation(bitsequence::BitArray,M)
+function bitModulation(bitsequence::BitArray,(M,alphabet, constellation))
     N = length(bitsequence)
     m = Int(log2(M))
     if mod(N,M) == 0
-        (alphabet, constellation) = MQAM(M)
-
         dictionary = Dict( alphabet[i] => constellation[i] for i=1:length(constellation))
 
         chunks = transpose(reshape(bitsequence,(m,floor(Int,N/m))))

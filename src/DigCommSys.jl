@@ -4,6 +4,7 @@ module DigCommSys
     import Statistics
     import Plots
     import SpecialFunctions
+    import Random
 
     include("GrayCode.jl")
     export GrayCode
@@ -11,9 +12,18 @@ module DigCommSys
     include("QAM.jl")
     export MQAM
 
+    include("PSK.jl")
+    export MPSK
+
     include("bitModulation.jl")
     export bitModulation
 
     include("bitDemodulation.jl")
     export bitDemodulation
+
+    include("AWGN.jl")
+    export AWGN
+
+    include("BERSER.jl")
+    export BER, SER
 end

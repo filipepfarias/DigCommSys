@@ -3,7 +3,7 @@
 QAM Modulation
 ---
 """
-function MQAM(M,energy=2)
+function MQAM(M,energy=2,unitAveragePower=false)
     if M==sqrt(M)^2 && 0==mod(M,2)
         m = Int(√M);
         d = sqrt(2*energy); #Digital Communications-Proakis (Table 3.2-1)
@@ -11,7 +11,9 @@ function MQAM(M,energy=2)
 
         I = ((2*(1:m) .- 1 .- m)*d/2) .+0*1im;
         Q = I.*1im
-        constellation = (Q.+transpose(I))
+        constellation = (Q.+transpose(I));
+        
+        unitAveragePower ? constellation = constellation ./ √avgEnergy : nothing;
 
         alphabet = GrayCode(Int(log2(M)))
         alphabet = [bitstring(alphabet[i,:]) for i=1:size(alphabet)[1]]
@@ -21,7 +23,7 @@ function MQAM(M,energy=2)
             alphabet[:,i] = alphabet[end:-1:1,i]
         end
 
-        return alphabet, constellation
+        return M, alphabet, constellation
     else
         error("M is neither square nor even.")
     end

@@ -3,14 +3,10 @@
 bitDemodulation(signal,M)
 ---
 """
-function bitDemodulation(signal,M)
+function bitDemodulation(signal,(M,alphabet, constellation))
     m = Int(log2(M))
     N = length(signal)*m
     if mod(N,M) == 0
-        (alphabet, constellation) = MQAM(M)
-
-        d = 2; # To define
-
         dictionary = Dict( 
             constellation[i] => alphabet[i] for i=1:length(constellation)
             )
