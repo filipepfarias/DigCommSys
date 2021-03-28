@@ -9,13 +9,9 @@ function bitDemodulation(signal,(M,alphabet, constellation))
     if mod(N,M) == 0
         dictionary = Dict( 
             constellation[i] => alphabet[i] for i=1:length(constellation)
-            )
-        
-        (_,ids) = findmin(
-            abs.(transpose(constellation[:]) .- signal[:]),
-            dims=2)
+            );
 
-        chunks = map(p -> dictionary[constellation[p[2]]],ids)
+        chunks = absClassifier(dictionary,constellation,signal);
         
         bitsequence = BitArray(transpose(
             BitArray(map(

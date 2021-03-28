@@ -21,9 +21,12 @@ module DigCommSys
     include("bitDemodulation.jl")
     export bitDemodulation
 
+    include("signalClassifier.jl")
+    export absClassifier
+
     include("AWGN.jl")
     export AWGN
 
     include("BERSER.jl")
-    export BER, SER
+    export BER, SER, TER
 end

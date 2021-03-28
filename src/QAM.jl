@@ -3,7 +3,7 @@
 QAM Modulation
 ---
 """
-function MQAM(M,energy=2,unitAveragePower=false)
+function MQAM(M,energy=2;unitAveragePower=true)
     if M==sqrt(M)^2 && 0==mod(M,2)
         m = Int(√M);
         d = sqrt(2*energy); #Digital Communications-Proakis (Table 3.2-1)

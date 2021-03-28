@@ -10,7 +10,7 @@ function AWGN(signal,SNR)
 
     σ = √(avgEnergy/SNR);
 
-    tsignal = signal./√avgEnergy + σ * (randn(N,1) + 1im*randn(N,1));
+    tsignal = signal.*√avgEnergy + σ/√2 * (randn(N,1) + 1im*randn(N,1));
     
     return tsignal
 end
