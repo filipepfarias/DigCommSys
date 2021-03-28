@@ -13,11 +13,8 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 5c7202f0-8f78-11eb-00a9-d1e00eb565b1
-using Revise, Plots
-
 # ╔═╡ 9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
-using DigCommSys
+using DigCommSys, Plots
 
 # ╔═╡ 8df467aa-8bd9-11eb-088e-218f062da936
 md"# Digital Communication Systems
@@ -33,6 +30,9 @@ begin
 	import Pkg
 	Pkg.add(url="https://github.com/filippfarias/DigCommSys")
 end
+
+# ╔═╡ 5c7202f0-8f78-11eb-00a9-d1e00eb565b1
+# using Revise
 
 # ╔═╡ f1835c24-8bdc-11eb-2e3e-ffaca518a99c
 md"""
@@ -300,7 +300,7 @@ end
 # ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
 begin
 	plotly();
-	_,alphabetQ13,constellationQ13 = MQAM(parse(Int64,Mconst),1,unitAveragePower=false);
+	_,A4QAMq13,A4QAMq13 = MQAM(parse(Int64,Mconst),1,unitAveragePower=false);
 	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
 	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
 end
@@ -308,7 +308,7 @@ end
 # ╔═╡ Cell order:
 # ╟─8df467aa-8bd9-11eb-088e-218f062da936
 # ╠═25bc3a22-8be4-11eb-1414-0b8e408a7b54
-# ╠═5c7202f0-8f78-11eb-00a9-d1e00eb565b1
+# ╟─5c7202f0-8f78-11eb-00a9-d1e00eb565b1
 # ╠═9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
 # ╟─f1835c24-8bdc-11eb-2e3e-ffaca518a99c
 # ╟─57549df8-8c3f-11eb-16a5-c33fe4560e41
@@ -322,7 +322,7 @@ end
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
 # ╟─684ef8fc-8c69-11eb-0947-771929a7f355
 # ╟─4d3d96b6-8ce0-11eb-21c2-ebfbda60351f
-# ╟─8d99049a-8c6b-11eb-3118-51c16e0927bf
+# ╠═8d99049a-8c6b-11eb-3118-51c16e0927bf
 # ╠═78f40b68-8c6c-11eb-2925-15974d7dccb5
 # ╟─d087448c-8e8d-11eb-20f2-a77402b7fde6
 # ╠═a4585958-8f41-11eb-374d-056505794fdb
