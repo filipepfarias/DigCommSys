@@ -13,8 +13,8 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
-using DigCommSys, Plots
+# ╔═╡ 2780cb8e-901c-11eb-3bf6-6149f19d97c3
+using Plots, DigCommSys
 
 # ╔═╡ 8df467aa-8bd9-11eb-088e-218f062da936
 md"# Digital Communication Systems
@@ -30,9 +30,6 @@ begin
 	import Pkg
 	Pkg.add(url="https://github.com/filippfarias/DigCommSys")
 end
-
-# ╔═╡ 5c7202f0-8f78-11eb-00a9-d1e00eb565b1
-# using Revise
 
 # ╔═╡ f1835c24-8bdc-11eb-2e3e-ffaca518a99c
 md"""
@@ -157,14 +154,16 @@ md"""
 # ╔═╡ d087448c-8e8d-11eb-20f2-a77402b7fde6
 html"""
 <h4>Question 2</h4>
-<p>We have the exact error probability for a rectangular M-QAM is give by <a href="#ref-proakis">[Proakis]</a> at Equation 4.3-30, just noting that $\mathcal{E}_\text{avg} = \log_{10}M\mathcal{E}_\text{bavg}$
+<p>We have the exact error probability for a rectangular M-QAM is given by <a href="#ref-proakis">[Proakis]</a> at Equation 4.3-30, just noting that $\mathcal{E}_\text{avg} = \log_{10}M\mathcal{E}_\text{bavg}$
 
 $$\begin{aligned}
 P_{e, M-\mathrm{QAM}}=& 4\left(1-\frac{1}{\sqrt{M}}\right) Q\left(\sqrt{\frac{3 }{M-1} \frac{\mathcal{E}_{\mathrm{avg}}}{N_{0}}}\right) \\
 & \times\left(1-\left(1-\frac{1}{\sqrt{M}}\right) Q\left(\sqrt{\frac{3 }{M-1} \frac{\mathcal{E}_{\mathrm{avg}}}{N_{0}}}\right)\right)
 \end{aligned}.$$
 
-If we consider the $\text{SNR}=\mathcal{E}_{\mathrm{avg}}/N_{0}$ per bit we obtain the curves below. The <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/BERSER.jl" target="_blank">implementation</a> at the function <code>TER</code> gives the <strong>Theoretical Error Rates</strong> in function of the <strong>Complementary Error Function</strong>, using the relation $$ Q(x) = \frac{1}{2}\operatorname{erfc} \left(\frac{x}{\sqrt{2}} \right) $$ </p>
+If we consider the $\text{SNR}=\mathcal{E}_{\mathrm{avg}}/N_{0}$ per bit we obtain the curves below. The <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/BERSER.jl" target="_blank">implementation</a> at the function <code>TER</code> gives the <strong>Theoretical Error Rates</strong> in function of the <strong>Complementary Error Function</strong>, using the relation $$ Q(x) = \frac{1}{2}\operatorname{erfc} \left(\frac{x}{\sqrt{2}} \right) $$ 
+
+Then we plot in the interval <code>SNRdB = 0:1:20</code>.</p>
 """
 
 # ╔═╡ a4585958-8f41-11eb-374d-056505794fdb
@@ -182,10 +181,30 @@ end
 md"""
 #### Question 3
 
+The **Symbol Error Rate** (SER), as the name suggests, it's the rate between the number of wrong symbols and the number of sent symbols. Similarly is the **Bit Error Rate**, but looking each bit individually. To simulate the wrong bits, we need to explain how the process of sending a symbol happens in this work.
+
+###### 1. Generating the message
+First of all we need to generate the message to be sent using one of our modulations. We generate a sequence of bits `bitseq` in the line below.
 """
 
 # ╔═╡ c4fa94ce-9007-11eb-166d-bd7f97682161
 bitseq = BitArray(rand((0,1),1,264000));
+
+# ╔═╡ 38f8742e-9018-11eb-0b6e-dfced0559513
+html"""
+<h6>2. Generating the symbol constelation</h6>
+<p>
+After we need to indicate where are the symbols of our modulation are. We can do this using one of the modulation functions <code>MQAM</code> or <code>MPSK</code> (<i>the code for PSK will be presented below when we treat about it</i>).
+
+This information can be passed directly to <code>bitModulation</code> function implemented <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/bitModulation.jl" target="_blank">here</a>. The function creates a <code>dictionary</code> that assign each symbol to its respective code word in bits. Then we slice the initial <code>bitseq</code> in <code>chunks</code> of the size <code>M</code> of the modulation. Finally we assign the respective symbol to each chunck.</p>
+"""
+
+# ╔═╡ 6674fe84-901a-11eb-11a5-7fcb2e63f29b
+md"""
+	signal4QAM = bitModulation(bitseq,MQAM(4));
+
+As shown above, `bitModulation` modulates `bitseq` with a 4-QAM, i.e `MQAM(4)`. In the code below, we do this for 4, 16 and 64 orders of the QAM"
+"""
 
 # ╔═╡ a447330c-9007-11eb-2467-27570bf1c6f2
 begin
@@ -193,6 +212,45 @@ begin
 	signal16QAM = bitModulation(bitseq,MQAM(16));
 	signal64QAM = bitModulation(bitseq,MQAM(64));
 end
+
+# ╔═╡ b6ad2b5c-9019-11eb-0f45-0707b994a43e
+md"""
+We can see an example of some symbols for the `signal16QAM` variable assigned above.
+"""
+
+# ╔═╡ edefcb92-9019-11eb-0340-a513618513b3
+scatter(signal16QAM[1:100],title="16-QAM Symbols",legend=:false)
+
+# ╔═╡ 84219e1e-9020-11eb-31fe-d526c59b81c6
+html"""
+<h6>3. Simulating a channel</h6>
+<p>The next step is sent the <code>signal16QAM</code> through a <code>AWGN</code> channel, implemented <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/AWGN.jl" target="_blanck">here</a>. The noise added by the channel has <b>standard deviation</b> $\sigma = \sqrt{N_0/2}$, which can be passed in function of <code>√avgEnergy</code> which is the <b>average symbol energy</b> of the sent signal <code>σ = √(avgEnergy/SNR)</code>. The <code>SNR</code>(Signal Noise Ratio). We <b>rescale</b> the signal once sent to recover its original constelation position <a href="#ref-dsplog">[DSPLOG]</a>, multiplying it by <code>√avgEnergy</code>. The sinal after the channel is plotted below with a <code>SNR</code> of 20 dB.</p>
+"""
+
+# ╔═╡ 3012015e-9022-11eb-162b-714fbae56ef1
+scatter(AWGN(signal16QAM[1:100],10.0.^(20/10)),title="16-QAM Symbols",legend=:false)
+
+# ╔═╡ b59bed5c-9023-11eb-3779-63f9c1cb8f9c
+html"""
+<h6>4. Demodulating the received signal</h6>
+<p>Once received, we must pass the signal through a <b>classifier</b> which decides to which symbol in the original constellation the received symbol belongs. As the symbols in the original constellation has the <b>same probability</b>, the <b> optimal threshold</b> is at the <b>half of the distance between neighbor symbols</b>. This is <a target="_blank" href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/signalClassifier.jl">implemented</a> in the <code>absClassifier</code>, where we evaluate the <b>absolute distance</b> in</p>
+
+<pre><code>abs.(transpose(constellation[:]) .- signal[:])</code></pre>
+
+<p>between every sent symbol and each symbol in the original constellation. The <code>findmin</code> function finds, at each sent symbol, the <b>closer constellation symbol</b>. Wrapping up, this distance is <b>always smaller</b> at the side of the threshold for which symbol we have to decide for. This is similar to "slice" the space where the symbols are, according to where the threshold lays on, which is exactly where the distance is equal for the both neighbor original constellation symbols.</p>
+
+<p>Finally, the decided symbols are assigned to its respective code word, at the <code>bitDemodulation</code> dunction implemented <a target="_blank" href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/bitDemodulation.jl">here</a>.</p>
+"""
+
+# ╔═╡ a54b1416-9026-11eb-3560-a3c9bd59129d
+html"""
+<h6>5. Counting the errors</h6>
+<p>In this last part, we count the bits which the classifier decided wrong. Using the function <code>BER</code>, implemented <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/BERSER.jl" target="_blank">here</a>, we compare the sent message <code>signal4QAM</code> with the one after the channel in <code>sum(bitseq .!= rbitseq)</code>. For reasons of implementation, all the previous steps <b>3</b> and <b>4</b> were applied just at this point, as can be saw in the code.</p>
+
+<p> This function can implement too a <b>Monte Carlo</b> simulation. We pass the signal <code>iter</code> times through the <code>AWGN</code> channel. This may be necessary in simulations fow AWGN channels with SNR greater than 15 dB, as experienced at this work. This due the fact that, for detect a wrong signal, it must lay on the wrong side of the threshold. But if the noise is not strong enough, the probability of it pushes the symbol beyond the threshold is too small, then we need to sample several time in order to obtain a number closer to the theoretical result.</p>
+
+<p>Below, the <code>Simu*</code> variables receive the results of the <code>BER</code> and <code>SER</code> functions.
+"""
 
 # ╔═╡ 2a40e80c-900a-11eb-29a8-31ca61a382f4
 begin
@@ -210,15 +268,27 @@ begin
 	pQ3BER = plot(SNRdB,[SimuBER4QAM SimuBER16QAM SimuBER64QAM]);
 	pQ3SER = plot(SNRdB,[SimuSER4QAM,SimuSER16QAM,SimuSER64QAM]);
 	plot(pQ3SER,yaxis=:log10,ylim=(1e-5,1),title="Simulated SER",xlabel="SNR(dB)",ylabel=["SER" "BER"],label=["4-QAM" "16-QAM" "64-QAM"],mark=:o,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
-		xticks!(collect(0:2:20),title="Theoretical SER",xlabel="SNR(dB)",ylabel="SER");
+	xticks!(collect(0:2:20));
 end
 
 # ╔═╡ cbb6ab50-900e-11eb-09a8-d5b2292bb292
 begin
 	plot(pQ3BER,yaxis=:log10,ylim=(1e-5,1),xlabel="SNR(dB)",ylabel=["BER" "BER"],title="Simulated BER",label=["4-QAM" "16-QAM" "64-QAM"],mark=:o,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)))
-	xticks!(collect(0:2:20),title="Theoretical SER",xlabel="SNR(dB)",ylabel="SER");
+	xticks!(collect(0:2:20));
 	
 	
+end
+
+# ╔═╡ 1cb43388-902a-11eb-0972-8d63b7535172
+html"""
+<h4>Question 4</h4>
+"""
+
+# ╔═╡ f8c2c728-902c-11eb-3d65-9300fe828483
+begin
+ 	m,alphabetQ4,constellationQ4 = MPSK(4,1,unitAveragePower=false);
+	scatter(real(constellationQ4[:]),imag(constellationQ4[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
+	annotate!((real(constellationQ4[:]),imag(constellationQ4[:]) .+ .06,alphabetQ4[:],10));
 end
 
 # ╔═╡ 7550330e-9010-11eb-1cba-695d74093019
@@ -300,7 +370,7 @@ end
 # ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
 begin
 	plotly();
-	_,A4QAMq13,A4QAMq13 = MQAM(parse(Int64,Mconst),1,unitAveragePower=false);
+	_,alphabetQ13,constellationQ13 = MQAM(parse(Int64,Mconst),1,unitAveragePower=false);
 	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
 	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
 end
@@ -308,8 +378,7 @@ end
 # ╔═╡ Cell order:
 # ╟─8df467aa-8bd9-11eb-088e-218f062da936
 # ╠═25bc3a22-8be4-11eb-1414-0b8e408a7b54
-# ╟─5c7202f0-8f78-11eb-00a9-d1e00eb565b1
-# ╠═9544fbf0-8bd9-11eb-2a08-ff3364fb0c58
+# ╠═2780cb8e-901c-11eb-3bf6-6149f19d97c3
 # ╟─f1835c24-8bdc-11eb-2e3e-ffaca518a99c
 # ╟─57549df8-8c3f-11eb-16a5-c33fe4560e41
 # ╟─9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
@@ -322,16 +391,26 @@ end
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
 # ╟─684ef8fc-8c69-11eb-0947-771929a7f355
 # ╟─4d3d96b6-8ce0-11eb-21c2-ebfbda60351f
-# ╠═8d99049a-8c6b-11eb-3118-51c16e0927bf
-# ╠═78f40b68-8c6c-11eb-2925-15974d7dccb5
+# ╟─8d99049a-8c6b-11eb-3118-51c16e0927bf
+# ╟─78f40b68-8c6c-11eb-2925-15974d7dccb5
 # ╟─d087448c-8e8d-11eb-20f2-a77402b7fde6
 # ╠═a4585958-8f41-11eb-374d-056505794fdb
-# ╠═ebaa895c-8f7a-11eb-3a19-d3b8330dbc01
+# ╟─ebaa895c-8f7a-11eb-3a19-d3b8330dbc01
 # ╠═c4fa94ce-9007-11eb-166d-bd7f97682161
+# ╟─38f8742e-9018-11eb-0b6e-dfced0559513
+# ╟─6674fe84-901a-11eb-11a5-7fcb2e63f29b
 # ╠═a447330c-9007-11eb-2467-27570bf1c6f2
+# ╟─b6ad2b5c-9019-11eb-0f45-0707b994a43e
+# ╠═edefcb92-9019-11eb-0340-a513618513b3
+# ╟─84219e1e-9020-11eb-31fe-d526c59b81c6
+# ╠═3012015e-9022-11eb-162b-714fbae56ef1
+# ╟─b59bed5c-9023-11eb-3779-63f9c1cb8f9c
+# ╟─a54b1416-9026-11eb-3560-a3c9bd59129d
 # ╠═2a40e80c-900a-11eb-29a8-31ca61a382f4
-# ╠═0afb3900-9007-11eb-2517-d1d6eb9788f2
+# ╟─0afb3900-9007-11eb-2517-d1d6eb9788f2
 # ╟─cbb6ab50-900e-11eb-09a8-d5b2292bb292
+# ╠═1cb43388-902a-11eb-0972-8d63b7535172
+# ╠═f8c2c728-902c-11eb-3d65-9300fe828483
 # ╠═7550330e-9010-11eb-1cba-695d74093019
 # ╠═726600fe-900f-11eb-2c5a-23c6e9d2da14
 # ╠═da42142e-900f-11eb-3b2e-450009059ed3
