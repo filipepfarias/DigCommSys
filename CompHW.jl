@@ -4,15 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
-        el
-    end
-end
-
 # ╔═╡ 2780cb8e-901c-11eb-3bf6-6149f19d97c3
 using Plots, DigCommSys
 
@@ -52,7 +43,7 @@ The energy of $\mathbf{s}_m$ will be given by
 
 $\mathcal{E}_m =||\mathbf{s}_m||^2=\frac{\mathcal{E}_g}{2}(A_{mi}^2+A_{mq}^2).$
 
-In the caso of the rectangular QAM, where $A_m=\pm1,\pm3,\dots,\pm(\sqrt{M}-1)$ for both in-phase and quadrature, we can sum the energy of each symbol at each direction, i.e.
+In the case of the rectangular QAM, where $A_m=\pm1,\pm3,\dots,\pm(\sqrt{M}-1)$ for both in-phase and quadrature, we can sum the energy of each symbol at each direction, i.e.
 
 $\begin{aligned}
 \mathcal{E}_\text{avg} &= \frac{1}{M} \frac{\mathcal{E}_g}{2}\sum_{m=1}^{\sqrt{M}} \sum_{n=1}^{\sqrt{M}}\left(A_{m}^{2}+A_{n}^{2}\right) \\ 
@@ -151,6 +142,30 @@ md"""
 	alphabet = GrayCode(Int(log2(M)))
 """
 
+# ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
+begin
+	plotly();
+	_,alphabetQ13,constellationQ13 = MQAM(4,1,unitAveragePower=false);
+	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
+	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10),title="4-QAM");
+end
+
+# ╔═╡ 671b4d78-9035-11eb-0a9e-a3abea476a77
+begin
+	plotly();
+	_1,alphabetQ131,constellationQ131 = MQAM(16,1,unitAveragePower=false);
+	scatter(real(constellationQ131[:]),imag(constellationQ131[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
+	annotate!((real(constellationQ131[:]),imag(constellationQ131[:]) .+ .06,alphabetQ131[:],10),title="16-QAM");
+end
+
+# ╔═╡ 68a8d124-9035-11eb-0d05-97e7e4454d10
+begin
+	plotly();
+	_2,alphabetQ132,constellationQ132 = MQAM(64,1,unitAveragePower=false);
+	scatter(real(constellationQ132[:]),imag(constellationQ132[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
+	annotate!((real(constellationQ132[:]),imag(constellationQ132[:]) .+ .06,alphabetQ132[:],10),title="4-QAM");
+end
+
 # ╔═╡ d087448c-8e8d-11eb-20f2-a77402b7fde6
 html"""
 <h4>Question 2</h4>
@@ -170,9 +185,9 @@ Then we plot in the interval <code>SNRdB = 0:1:20</code>.</p>
 begin
 	plotly();
 	SNRdB = 0:1:20;
-	SER4QAM, = TER("QAM",4,SNRdB);
-	SER16QAM, = TER("QAM",16,SNRdB);
-	SER64QAM, = TER("QAM",64,SNRdB);
+	SER4QAM,BER4QAM = TER("QAM",4,SNRdB);
+	SER16QAM,BER16QAM = TER("QAM",16,SNRdB);
+	SER64QAM,BER64QAM = TER("QAM",64,SNRdB);
 	p = plot(SNRdB,[SER64QAM,SER16QAM,SER4QAM],label=["64-QAM" "16-QAM" "4-QAM"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20),yminorticks=5);
 	xticks!(collect(0:2:20),title="Theoretical SER",xlabel="SNR(dB)",ylabel="SER");
 end
@@ -254,11 +269,11 @@ html"""
 
 # ╔═╡ 2a40e80c-900a-11eb-29a8-31ca61a382f4
 begin
-		SimuBER4QAM = map(snr-> BER(signal4QAM,snr,MQAM(4)),SNRdB);
+		SimuBER4QAM = map(snr-> BER(signal4QAM,snr,MQAM(4),iter=10),SNRdB);
 		SimuBER16QAM = map(snr-> BER(signal16QAM,snr,MQAM(16)),SNRdB);
 		SimuBER64QAM = map(snr-> BER(signal64QAM,snr,MQAM(64)),SNRdB);
 		
-		SimuSER4QAM = map(snr-> SER(signal4QAM,snr,MQAM(4)),SNRdB);
+		SimuSER4QAM = map(snr-> SER(signal4QAM,snr,MQAM(4),iter=10),SNRdB);
 		SimuSER16QAM = map(snr-> SER(signal16QAM,snr,MQAM(16)),SNRdB);
 		SimuSER64QAM = map(snr-> SER(signal64QAM,snr,MQAM(64)),SNRdB);
 end
@@ -280,8 +295,46 @@ begin
 end
 
 # ╔═╡ 1cb43388-902a-11eb-0972-8d63b7535172
+md"""
+#### Question 4.1
+
+###### 1. Constellation Average Energy
+
+The Average Constellation Energy for the PSK can be obtained in a similar way of the QAM. We consider the same basis functions, just **adding a phase shifting term** [[Proakis]](#ref-proakis), obtaining the bidimensional form, 
+
+$\mathbf{s}_m=\left(\sqrt{\frac{\mathcal{E}_{g}}{2}} \cos \left(\frac{2 \pi}{M}(m-1)\right), \sqrt{\frac{\mathcal{E}_{g}}{2}} \sin \left(\frac{2 \pi}{M}(m-1)\right)\right), \quad m=1,2,\dots,M.$
+
+Note the norm of the symbol does **not** change, always laying in a circle of square radius equals the half of the pulse energy, then 
+
+$$\mathcal{E}_\text{avg} = \frac{1}{M} \cdot \sum_{m=1}^M \frac{\mathcal{E}_g}{2} = \frac{1}{2}\mathcal{E}_g.$$
+
+"""
+
+# ╔═╡ 7300fd16-9032-11eb-19b2-096883eb3511
+md"""
+###### 2. Minimum distance
+
+By the bidimensional form given above, we have that the minumum distance between signal points is
+
+$\begin{aligned}
+d_{m n} &=\sqrt{\left\|\mathbf{s}_{m}-\mathbf{s}_{n}\right\|^{2}} \\
+&=\sqrt{\mathcal{E}_{g}\left[1-\cos \left(\frac{2 \pi}{M}(m-n)\right)\right]}
+\end{aligned}$
+
+If $n$ is the neighbor, then $|m-n|=1$. Knowing that $\cos (2 \theta)=1-2 \sin ^{2} \theta$, we obtaing
+
+$d_{\min }=\sqrt{\mathcal{E}_{g}\left(1-\cos \frac{2 \pi}{M}\right)}=\sqrt{2 \mathcal{E}_{g} \sin ^{2} \frac{\pi}{M}}.$
+
+"""
+
+# ╔═╡ 734fd4da-9033-11eb-1d25-ebe0ecfdf570
 html"""
-<h4>Question 4</h4>
+<h6> 3. Modulator and demodulator</h6>
+
+<p>Both modulator and demodulator are implemented in a similar way of the QAM, just using the symbols generated by the <code>PSK</code> function implemented <a target="_blank" href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/PSK.jl">here</a>. It uses the fact of the bidimensional form above as in
+
+<pre><code>phase = 2pi/M .* (m.-1);
+constellation = √(.5energy) * ( cos.(phase) + 1im .* sin.(phase));</code></pre>
 """
 
 # ╔═╡ f8c2c728-902c-11eb-3d65-9300fe828483
@@ -289,6 +342,31 @@ begin
  	m,alphabetQ4,constellationQ4 = MPSK(4,1,unitAveragePower=false);
 	scatter(real(constellationQ4[:]),imag(constellationQ4[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
 	annotate!((real(constellationQ4[:]),imag(constellationQ4[:]) .+ .06,alphabetQ4[:],10));
+end
+
+# ╔═╡ 08508e66-9035-11eb-3b5e-41f34f2c4a50
+begin
+ 	m42,alphabetQ42,constellationQ42 = MPSK(8,1,unitAveragePower=false);
+	scatter(real(constellationQ42[:]),imag(constellationQ42[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
+	annotate!((real(constellationQ42[:]),imag(constellationQ42[:]) .+ .06,alphabetQ42[:],10));
+end
+
+# ╔═╡ c838a1a0-9035-11eb-3efb-ff796ddf6d25
+html"""
+<h4>Question 4.2-3</h4>
+<p>As in<b>Question 2</b> the <a href="https://raw.githubusercontent.com/filippfarias/DigCommSys/master/src/BERSER.jl" target="_blank">implementation</a> at the function <code>TER</code> gives the <strong>Theoretical Error Rates</strong> using the expression <a href="#ref-proakis">[Proakis]</a> at Equation 4.3-34, just noting that $\mathcal{E}_\text{avg} = \log_{10}M\mathcal{E}_\text{bavg}$
+
+$$P_{M} \approx 2 Q\left(\sqrt{\left(2 \log _{2} M\right) \sin ^{2}\left(\frac{\pi}{M}\right) \frac{\mathcal{E}_{b}}{N_{0}}}\right).$$
+
+Then we plot in the interval <code>SNRdB = 0:1:20</code>.</p>
+"""
+
+# ╔═╡ 8624d396-9036-11eb-3bd0-216cafe61255
+begin
+	SER4PSK,BER4PSK = TER("PSK",4,SNRdB);
+	SER8PSK,BER8PSK = TER("PSK",8,SNRdB);
+	p42 = plot(SNRdB,[SER4PSK,SER8PSK],label=["4-PSK" "8-PSK"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20));
+	xticks!(collect(0:2:20),title="Theoretical SER",xlabel="SNR(dB)",ylabel="SER");
 end
 
 # ╔═╡ 7550330e-9010-11eb-1cba-695d74093019
@@ -315,6 +393,39 @@ end
 
 # ╔═╡ dac483be-900f-11eb-02e1-49b0840b3798
 plot(pQ41BER,yaxis=:log10,ylim=(1e-5,1),xlabel="SNR(dB)",ylabel=["BER" "BER"],title="Simulated BER",label=["4-PSK" "8-PSK"],mark=:o,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)))
+
+# ╔═╡ 9923382e-9037-11eb-26b7-75e85a4171c5
+md"""
+#### Question 5.1
+With ball marks, the simulated.
+"""
+
+# ╔═╡ ae9ec3ee-9037-11eb-0fc4-3329d863e33d
+begin
+	plot(SNRdB,[SER64QAM,SER16QAM,SER4QAM,SER4PSK,SER8PSK],label=["64-QAM" "16-QAM" "4-QAM" "4-PSK" "8-PSK"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20),yminorticks=5);
+	plot!(SNRdB,[SimuSER64QAM,SimuSER16QAM,SimuSER4QAM,SimuSER4PSK,SimuSER8PSK],label=["64-QAM" "16-QAM" "4-QAM" "4-PSK" "8-PSK"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20),mark=:o,markercolor = :transparent);
+	xticks!(collect(0:2:20),title="SER",xlabel="SNR(dB)",ylabel="SER");
+end
+
+# ╔═╡ 0db87482-9039-11eb-08bc-2593ecb43c37
+md"""
+#### Question 5.2
+
+With ball marks, the simulated.
+"""
+
+# ╔═╡ d79805ca-9038-11eb-2479-8de85915601b
+begin
+	plot(SNRdB,[BER64QAM,BER16QAM,BER4QAM,BER4PSK,BER8PSK],label=["64-QAM" "16-QAM" "4-QAM" "4-PSK" "8-PSK"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20),yminorticks=5);
+	plot!(SNRdB,[SimuBER64QAM,SimuBER16QAM,SimuBER4QAM,SimuBER4PSK,SimuBER8PSK],label=["64-QAM" "16-QAM" "4-QAM" "4-PSK" "8-PSK"],legend=(.3,.3),lw=2,yscale=:log10,ylim=(1e-6,1),xlim=(0,20),mark=:o,markercolor = :transparent);
+	xticks!(collect(0:2:20),title="BER",xlabel="SNR(dB)",ylabel="BER");
+end
+
+# ╔═╡ 10acaf46-9039-11eb-0943-e93ab2b8ca9a
+md"""
+#### Question 5.3
+In the later Plots we see that 4-QAM and 4-PSK have the **similar efficiencies**, what could be expecter given that one is just the phase shift of another. It is important to note the **decrease of the error rate** as the order of the modulation **rises**, but it requires a larger **update rate** when transmitting given that we send more bits per symbol, implying in a **larger frequency band**. We see to the increase of the SNR, i.e. the energy necessary to overcome the effect of the noise given that, when normalized to 1, the symbols become closer.
+"""
 
 # ╔═╡ 0d70be04-8bf6-11eb-0638-a35109c2d36c
 md"
@@ -361,18 +472,22 @@ end
 
 # ╔═╡ 8d99049a-8c6b-11eb-3118-51c16e0927bf
 begin 
-	correct("Answer for Question 1.3",md"""
-Select the modulation: `M = ` $(@bind Mconst html"<select><option value=4>4</option><option value=16>16</option><option value=64>64</option></select>")
-		
+	correct("Answer for Question 1.3",md"""	
 Note the plot below is **not normalised** by the average energy, but the normalization is required when the signal is sent.""");
 end
 
-# ╔═╡ 78f40b68-8c6c-11eb-2925-15974d7dccb5
-begin
-	plotly();
-	_,alphabetQ13,constellationQ13 = MQAM(parse(Int64,Mconst),1,unitAveragePower=false);
-	scatter(real(constellationQ13[:]),imag(constellationQ13[:]),legend=false,extra_plot_kwargs = KW(:yaxis => KW(:autorange => true),:xaxis => KW(:autorange => true)));
-	annotate!((real(constellationQ13[:]),imag(constellationQ13[:]) .+ .06,alphabetQ13[:],10));
+# ╔═╡ 2a7fc380-9032-11eb-3eab-9130582c4c48
+begin 
+	M2_ = [4,8];
+	e2_avg = 1 ./ 2;
+	correct("Answer for Question 4.1",md"""
+For $M=\{4,8\}$, considering $\mathcal{E}_g=1$, the average energy is $ $[e2_avg]. $ for both.""");
+end
+
+# ╔═╡ 7613d314-9034-11eb-332d-17ffdf9712bb
+begin 
+	correct("Answer for Question 4.2",md"""
+If $\sqrt{\mathcal{E}_g}=1$, then for $M=\{4,8\}$ is equal to $\sqrt{2}$ and $1$, respectively.""");
 end
 
 # ╔═╡ Cell order:
@@ -383,7 +498,7 @@ end
 # ╟─57549df8-8c3f-11eb-16a5-c33fe4560e41
 # ╟─9dbdeb40-8c24-11eb-1569-6f010c7f5ed5
 # ╟─98e4d1ba-8c45-11eb-2e90-21ecfb046773
-# ╟─7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
+# ╠═7dfecccc-8c5c-11eb-01e5-1f9b7f06dbc8
 # ╟─df072ef6-8c63-11eb-0064-8328864e88cf
 # ╟─8036d610-8c61-11eb-2cef-43773fdbf97c
 # ╟─53d7bd68-8f3a-11eb-251c-d9b4a34b8a44
@@ -391,8 +506,10 @@ end
 # ╟─45b663b0-8c67-11eb-1302-df7ec6e9452d
 # ╟─684ef8fc-8c69-11eb-0947-771929a7f355
 # ╟─4d3d96b6-8ce0-11eb-21c2-ebfbda60351f
-# ╟─8d99049a-8c6b-11eb-3118-51c16e0927bf
+# ╠═8d99049a-8c6b-11eb-3118-51c16e0927bf
 # ╟─78f40b68-8c6c-11eb-2925-15974d7dccb5
+# ╟─671b4d78-9035-11eb-0a9e-a3abea476a77
+# ╟─68a8d124-9035-11eb-0d05-97e7e4454d10
 # ╟─d087448c-8e8d-11eb-20f2-a77402b7fde6
 # ╠═a4585958-8f41-11eb-374d-056505794fdb
 # ╟─ebaa895c-8f7a-11eb-3a19-d3b8330dbc01
@@ -409,12 +526,24 @@ end
 # ╠═2a40e80c-900a-11eb-29a8-31ca61a382f4
 # ╟─0afb3900-9007-11eb-2517-d1d6eb9788f2
 # ╟─cbb6ab50-900e-11eb-09a8-d5b2292bb292
-# ╠═1cb43388-902a-11eb-0972-8d63b7535172
-# ╠═f8c2c728-902c-11eb-3d65-9300fe828483
+# ╟─1cb43388-902a-11eb-0972-8d63b7535172
+# ╟─2a7fc380-9032-11eb-3eab-9130582c4c48
+# ╟─7300fd16-9032-11eb-19b2-096883eb3511
+# ╟─7613d314-9034-11eb-332d-17ffdf9712bb
+# ╟─734fd4da-9033-11eb-1d25-ebe0ecfdf570
+# ╟─f8c2c728-902c-11eb-3d65-9300fe828483
+# ╟─08508e66-9035-11eb-3b5e-41f34f2c4a50
+# ╟─c838a1a0-9035-11eb-3efb-ff796ddf6d25
+# ╠═8624d396-9036-11eb-3bd0-216cafe61255
 # ╠═7550330e-9010-11eb-1cba-695d74093019
 # ╠═726600fe-900f-11eb-2c5a-23c6e9d2da14
 # ╠═da42142e-900f-11eb-3b2e-450009059ed3
 # ╠═dac483be-900f-11eb-02e1-49b0840b3798
+# ╟─9923382e-9037-11eb-26b7-75e85a4171c5
+# ╠═ae9ec3ee-9037-11eb-0fc4-3329d863e33d
+# ╟─0db87482-9039-11eb-08bc-2593ecb43c37
+# ╠═d79805ca-9038-11eb-2479-8de85915601b
+# ╟─10acaf46-9039-11eb-0943-e93ab2b8ca9a
 # ╟─0d70be04-8bf6-11eb-0638-a35109c2d36c
 # ╟─21953290-8bf7-11eb-025f-87f8477b88c2
 # ╟─8e37ac06-8c5b-11eb-3ca4-07b42d5b841a
