@@ -3,7 +3,7 @@
 BER
 ---
 """
-function BER(signal,SNRdB,(M,alphabet,constellation),iter=1,saveResults=false)
+function BER(signal,SNRdB,(M,alphabet,constellation);iter=1;saveResults=false)
     i = 1;
     Eber = ones(iter,1);
     SNR = 10 .^(SNRdB/10);
@@ -29,7 +29,7 @@ end
 SER
 ---
 """
-function SER(signal,SNRdB,(M,alphabet,constellation),iter=1,saveResults=false)
+function SER(signal,SNRdB,(M,alphabet,constellation);iter=1;saveResults=false)
     i = 1;
     Eser = ones(iter,1);
     SNR = 10 .^(SNRdB/10);
